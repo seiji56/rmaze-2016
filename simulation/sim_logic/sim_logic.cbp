@@ -42,6 +42,9 @@
 			<Add option="-Wall" />
 			<Add directory="../../libs/SFML/include" />
 		</Compiler>
+		<Linker>
+			<Add library="X11" />
+		</Linker>
 		<Unit filename="main.cpp" />
 		<Extensions>
 			<code_completion />

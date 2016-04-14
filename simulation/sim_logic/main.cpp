@@ -1,4 +1,7 @@
 #include <SFML/Graphics.hpp>
+#ifdef __linux__
+#include <X11/Xlib.h>
+#endif // __linux
 
 void render_t(sf::RenderWindow *window)
 {
@@ -24,9 +27,14 @@ void handleEvn(sf::Event &evn, sf::RenderWindow* window)
 
 int main()
 {
+#ifdef __linux__//Call XInitThreads in case of linux compilation
+    XInitThreads();
+#endif // __linux__
     sf::RenderWindow window(sf::VideoMode(800, 600), "Logic Simulator");
+
     //Start Threads
-    sf::Thread rendering_thread(render_t, &window);
+
+    sf::Thread rendering_thread(&render_t, &window);
 
     rendering_thread.launch();
 
