@@ -1,6 +1,7 @@
 # depslib dependency file v1.0
-1460669968 source:/home/seijihariki/Documents/robotics/rmaze-2016/simulation/sim_logic/main.cpp
+1460670460 source:/home/seijihariki/Documents/robotics/rmaze-2016/simulation/sim_logic/main.cpp
 	<SFML/Graphics.hpp>
+	<X11/Xlib.h>
 
 1460487106 /home/seijihariki/Documents/robotics/rmaze-2016/libs/SFML/include/SFML/Graphics.hpp
 	<SFML/Window.hpp>
