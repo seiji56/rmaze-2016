@@ -45,10 +45,15 @@
 		<Linker>
 			<Add library="X11" />
 		</Linker>
+		<Unit filename="kernelML.cpp" />
+		<Unit filename="kernelML.hpp" />
+		<Unit filename="kernelTL.cpp" />
 		<Unit filename="kernelTL.hpp" />
 		<Unit filename="main.cpp" />
 		<Unit filename="simulator.cpp" />
 		<Unit filename="simulator.hpp" />
+		<Unit filename="types.cpp" />
+		<Unit filename="types.hpp" />
 		<Extensions>
 			<code_completion />
 			<debugger />
