@@ -104,6 +104,7 @@ GY80_single_raw GY80::m_read_raw()
     raw.x = (buffer[0] << 8) | buffer[1];
     raw.z = (buffer[2] << 8) | buffer[3];
     raw.y = (buffer[4] << 8) | buffer[5];
+    delete buffer; 
     return raw;
 }
 
@@ -169,6 +170,7 @@ GY80_single_raw GY80::a_read_raw()
 	raw.x = (((int16_t)buf[1]) << 8) | buf[0];
 	raw.y = (((int16_t)buf[3]) << 8) | buf[2];
 	raw.z = (((int16_t)buf[5]) << 8) | buf[4];
+    delete buf;
     return raw;
 }
 
@@ -225,6 +227,7 @@ GY80_single_raw GY80::g_read_raw()
     raw.x = (buffer[1] << 8) | buffer[0];
     raw.y = (buffer[3] << 8) | buffer[2];
     raw.z = (buffer[5] << 8) | buffer[4];
+    delete buffer;
     return raw;
 }
 
@@ -279,6 +282,7 @@ uint32_t GY80::p_read_raw()
 
     up = (((unsigned long) buffer[0] << 16) | ((unsigned long) buffer[1] << 8) | (unsigned long) buffer[2]) >> (8-p_oss);
 
+    delete buffer;
     return up;
 }
 
@@ -343,6 +347,7 @@ uint16_t GY80::t_read_raw()
     buffer = read(GY80_dev_p,0xF6,2);
     // Read two bytes from registers 0xF6 and 0xF7
     ut = (buffer[0]<<8)|buffer[1];
+    delete buffer;
     return ut;
 }
 
@@ -373,21 +378,8 @@ void GY80::write(uint8_t device, uint8_t address, uint8_t data)
 uint8_t* GY80::read(uint8_t device, uint8_t address, uint8_t length)
 {
     Wire.beginTransmission(device);
-    Wire.write(address);
+    uint8_t buffer = new uint8_t[length];
+    Wire.read_rs(&address, buffer, length);
     Wire.endTransmission();
-
-    //Wire.beginTransmission(device);
-    Wire.requestFrom(device, length);
-    uint8_t buffer[length];
-    while(Wire.available()<length);
-    if(Wire.available() == length)
-    {
-        for(uint8_t i = 0; i < length; i++)
-        {
-            buffer[i] = Wire.read();
-        }
-    }
-    Wire.endTransmission();
-
     return buffer;
 }
