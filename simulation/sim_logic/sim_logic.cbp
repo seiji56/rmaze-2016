@@ -18,7 +18,7 @@
 					<Add library="sfml-window-d" />
 					<Add library="sfml-graphics-d" />
 					<Add library="sfml-system-d" />
-					<Add directory="../../libs/SFML/debug/lib" />
+					<Add directory="../../extlibs/SFML/debug/lib" />
 				</Linker>
 			</Target>
 			<Target title="Release">
@@ -34,13 +34,13 @@
 					<Add library="sfml-window" />
 					<Add library="sfml-graphics" />
 					<Add library="sfml-system" />
-					<Add directory="../../libs/SFML/release/lib" />
+					<Add directory="../../extlibs/SFML/release/lib" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
-			<Add directory="../../libs/SFML/include" />
+			<Add directory="../../extlibs/SFML/include" />
 		</Compiler>
 		<Linker>
 			<Add library="X11" />
@@ -50,6 +50,7 @@
 		<Unit filename="kernelTL.cpp" />
 		<Unit filename="kernelTL.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="sim_const.hpp" />
 		<Unit filename="simulator.cpp" />
 		<Unit filename="simulator.hpp" />
 		<Unit filename="types.cpp" />

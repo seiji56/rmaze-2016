@@ -14,7 +14,7 @@ namespace kernel
     protected:
         //OUTPUT
         //Locomotion
-        bool out_walk (int tiles, int* expected = -1);
+        bool out_walk (int tiles, int* expected = (int*)-1);
         void out_turn (int times);
         float out_align (int tout);
         void out_ramp ();
