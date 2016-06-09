@@ -18,8 +18,8 @@ namespace types
     enum color
     {
         WHITE,
-        BLACk,
-        GRAY
+        BLACK,
+        SILVER
     };
 
     //distance

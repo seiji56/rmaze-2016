@@ -45,11 +45,16 @@
 		<Linker>
 			<Add library="X11" />
 		</Linker>
+		<Unit filename="RoundedRectangleShape.cpp" />
+		<Unit filename="RoundedRectangleShape.hpp" />
 		<Unit filename="kernelML.cpp" />
 		<Unit filename="kernelML.hpp" />
 		<Unit filename="kernelTL.cpp" />
 		<Unit filename="kernelTL.hpp" />
 		<Unit filename="main.cpp" />
+		<Unit filename="map.map" />
+		<Unit filename="math_basics.cpp" />
+		<Unit filename="math_basics.hpp" />
 		<Unit filename="sim_const.hpp" />
 		<Unit filename="simulator.cpp" />
 		<Unit filename="simulator.hpp" />

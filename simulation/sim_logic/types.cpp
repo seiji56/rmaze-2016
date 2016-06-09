@@ -22,6 +22,11 @@ double types::dist::m()
     return raw/100;
 }
 
+double types::dist::tiles()
+{
+    return raw/30;
+}
+
 types::dist types::dist::operator+(types::dist d)
 {
     return types::dist(cm() + d.cm());
