@@ -5,7 +5,7 @@ void sim_logic::load_map(std::string filename)
 {
     int _w = w;
     int _h = h;
-    int **_pmap = pmap;
+    unsigned int **_pmap = pmap;
 
     std::ifstream mapfile;
     try
@@ -19,9 +19,9 @@ void sim_logic::load_map(std::string filename)
 
     mapfile >> w >> h;
     printf("Will load map of size %dx%d\n", w, h);
-    pmap = new int*[w];
+    pmap = new unsigned int*[w];
 
-    for (int i = 0; i < w; i++) pmap[i] = new int[h];
+    for (int i = 0; i < w; i++) pmap[i] = new unsigned int[h];
 
     printf("Allocated memory at %p for map.\n", pmap);
     if (!pmap)
@@ -38,7 +38,7 @@ void sim_logic::load_map(std::string filename)
         for (int x = 0; x < w; x++)
         {
             mapfile >> std::hex >> pmap[x][y];
-            printf("%d ", pmap[x][y]);
+            printf("%x\t", pmap[x][y]);
         }
         printf("\n");
     }
@@ -52,7 +52,7 @@ void sim_logic::set_map_size(int _w, int _h)
 }
 
 // Set map of size w, h from other map
-void sim_logic::set_map(int **_pmap, bool refer)
+void sim_logic::set_map(unsigned int **_pmap, bool refer)
 {
     if (refer) pmap = _pmap;
     else
@@ -224,6 +224,17 @@ void sim_logic::draw_phys_map(sf::RenderTexture* target)
     filled_rect.setSize(sf::Vector2f(cell_size*(size_percentage/2), cell_size*(size_percentage/2)));
     filled_rect.setOrigin(cell_size*(size_percentage/2), cell_size*(size_percentage/2));
 
+    sf::RectangleShape visited;
+    visited.setFillColor(sf::Color(0, 255, 0, .3*255));
+    visited.setSize(sf::Vector2f(cell_size, cell_size));
+    visited.setOrigin(cell_size/2, cell_size/2);
+    sf::RectangleShape to_visit;
+    to_visit.setFillColor(sf::Color(127, 0, 255, .3*255));
+    to_visit.setSize(sf::Vector2f(cell_size, cell_size));
+    to_visit.setOrigin(cell_size/2, cell_size/2);
+    //visited.setSize(sf::Vector2f(cell_size - 10*draw_ratio, cell_size - 10*draw_ratio));
+    //visited.setOrigin(cell_size/2 - 5*draw_ratio, cell_size/2 - 5*draw_ratio);
+
     sf::RoundedRectangleShape robot_base;
     robot_base.setCornersRadius(5*draw_ratio);
     robot_base.setCornerPointCount(80);
@@ -248,6 +259,38 @@ void sim_logic::draw_phys_map(sf::RenderTexture* target)
     circle.setOrigin(7*draw_ratio, 7*draw_ratio);
     circle.setFillColor(sf::Color(21, 0, 255, .50*255));
 
+    for (int x = 0; x < w; x++)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            sf::Vector2f corner(7*draw_ratio + 40*real_ratio*x + offsetx, 7*draw_ratio + 40*real_ratio*y + offsety);
+            sf::Vector2f center(corner.x + cell_size/2, corner.y + cell_size/2);
+
+            filled_rect.setPosition(center);
+            filled_round.setPosition(center);
+            if (pmap[x][y] & IS_BLACK)
+            {
+                filled_rect.setFillColor(sf::Color::Black);
+                filled_round.setFillColor(sf::Color::Black);
+                target->draw(filled_rect);
+                target->draw(filled_round);
+            }else if (pmap[x][y] & IS_SILVER){
+                filled_rect.setFillColor(sf::Color(160, 160, 160));
+                filled_round.setFillColor(sf::Color(160, 160, 160));
+                target->draw(filled_rect);
+                target->draw(filled_round);
+            }
+            if (pmap[x][y] & VISITED)
+            {
+                visited.setPosition(center);
+                target->draw(visited);
+            }else if (pmap[x][y] & TO_VISIT){
+                to_visit.setPosition(center);
+                target->draw(to_visit);
+            }
+        }
+    }
+
     for (int x = 0; x <= w; x++)
     {
         for (int y = 0; y <= h; y++)
@@ -268,49 +311,39 @@ void sim_logic::draw_phys_map(sf::RenderTexture* target)
                     wallshape.setSize(sf::Vector2f(10*draw_ratio , wall_len));
                     target->draw(wallshape);
                 }
-                if (x < w && y < h)
-                {
-                    filled_rect.setPosition(center);
-                    filled_round.setPosition(center);
-                    victim.setPosition(center);
-                    if (pmap[x][y] & IS_BLACK)
-                    {
-                        filled_rect.setFillColor(sf::Color::Black);
-                        filled_round.setFillColor(sf::Color::Black);
-                        target->draw(filled_rect);
-                        target->draw(filled_round);
-                    }else if (pmap[x][y] & IS_SILVER){
-                        filled_rect.setFillColor(sf::Color(160, 160, 160));
-                        filled_round.setFillColor(sf::Color(160, 160, 160));
-                        target->draw(filled_rect);
-                        target->draw(filled_round);
-                    }
-
-                    if (pmap[x][y] & VIC_UP)
-                    {
-                        victim.setRotation(0);
-                        target->draw(victim);
-                    }
-                    if (pmap[x][y] & VIC_RIGHT)
-                    {
-                        victim.setRotation(90);
-                        target->draw(victim);
-                    }
-                    if (pmap[x][y] & VIC_DOWN)
-                    {
-                        victim.setRotation(180);
-                        target->draw(victim);
-                    }
-                    if (pmap[x][y] & VIC_LEFT)
-                    {
-                        victim.setRotation(270);
-                        target->draw(victim);
-                    }
-                }
             }
             circle.setPosition(corner);
             target->draw(circle);
 
+        }
+    }
+    for (int x = 0; x < w; x++)
+    {
+        for (int y = 0; y < h; y++)
+        {
+            sf::Vector2f corner(7*draw_ratio + 40*real_ratio*x + offsetx, 7*draw_ratio + 40*real_ratio*y + offsety);
+            sf::Vector2f center(corner.x + cell_size/2, corner.y + cell_size/2);
+            victim.setPosition(center);
+            if (pmap[x][y] & VIC_UP)
+            {
+                victim.setRotation(0);
+                target->draw(victim);
+            }
+            if (pmap[x][y] & VIC_RIGHT)
+            {
+                victim.setRotation(90);
+                target->draw(victim);
+            }
+            if (pmap[x][y] & VIC_DOWN)
+            {
+                victim.setRotation(180);
+                target->draw(victim);
+            }
+            if (pmap[x][y] & VIC_LEFT)
+            {
+                victim.setRotation(270);
+                target->draw(victim);
+            }
         }
     }
 

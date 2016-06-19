@@ -3,15 +3,15 @@
 class sim_logic
 {
 public:
-    sim_logic() : lamp(false), facing(FRONT_DIR), px(0), py(0), pmap(0) {}
+    sim_logic() : lamp(false), facing(BACK_DIR), px(5), py(1), pmap(0) {}
     sim_logic(std::string filename) : lamp(false), facing(FRONT_DIR), px(0), py(0) {load_map(filename);}
-    sim_logic(int** _pmap, int _w, int _h, int _x, int _y, char _facing) : lamp(false), facing(_facing), px(_x), py(_y), w(_w), h(_h), pmap(_pmap) {}
+    sim_logic(unsigned int** _pmap, int _w, int _h, int _x, int _y, char _facing) : lamp(false), facing(_facing), px(_x), py(_y), w(_w), h(_h), pmap(_pmap) {}
 
     // Map setters
     void load_map(std::string filename);
 
     void set_map_size(int _w, int _h);
-    void set_map(int** _pmap, bool refer = false);
+    void set_map(unsigned int** _pmap, bool refer = false);
     void set_facing(char _facing);
 
     // For use of the simulated robot
@@ -58,5 +58,5 @@ private:
     int w;
     int h;
 
-    int** pmap;
+    unsigned int** pmap;
 };

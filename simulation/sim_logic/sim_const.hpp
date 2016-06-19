@@ -24,11 +24,13 @@ typedef unsigned char uchar;
 #define FILE_OPEN_ERR       02
 
 // Map memory mask
-#define WALL_UP             0x01
-#define WALL_LEFT           0x02
-#define IS_BLACK            0x04
-#define IS_SILVER           0x08
-#define VIC_UP              0x10
-#define VIC_RIGHT           0x20
-#define VIC_LEFT            0x40
-#define VIC_DOWN            0x80
+#define WALL_UP             0x001
+#define WALL_LEFT           0x002
+#define IS_BLACK            0x004
+#define IS_SILVER           0x008
+#define VIC_UP              0x010
+#define VIC_RIGHT           0x020
+#define VIC_LEFT            0x040
+#define VIC_DOWN            0x080
+#define VISITED             0x100
+#define TO_VISIT            0x200
