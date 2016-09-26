@@ -4,10 +4,16 @@ import pylibs.base_lib as kernel
 VISITED=0x04
 COLOR=0x08
 CHECK=0x10
+RAMP=0x60
 
 PULLBACK = 0x01
 PATHFINDING = 0x02
 IMMEDIATE = 0x03
+
+RIGHT = 0x01
+LEFT = 0x03
+FRONT = 0x00
+BACK = 0x02
 
 class ai:
     def __init__(self, m=map(10), zero_t=True, init_pos=(0, 0, 0)):
@@ -33,20 +39,22 @@ class ai:
         met = self.best_method()
 
         if met == PATHFINDING:
+            print("Pathfinding action")
             path = []
             self.find_path(path)
             acts = []
             self.translate_path(acts, path)
             act = acts[0]
         elif met == IMMEDIATE:
+            print("Immediate action")
             act = self.immediate()
         elif met == PULLBACK:
+            print("Pullback action")
             act = (BACK, 1)
         else:
             print("Unknown method " + str(met))
             return
-
-        apply(act, kernel.execute(act))
+        self.apply(act, kernel.execute(act))
 
     def best_method(self):
         if self.M.at(self.pos[0], self.pos[1], self.pos[2]) & COLOR == 0:
@@ -57,7 +65,7 @@ class ai:
 
         disponible = 0
         for i in available:
-            if self.M.at(i) & VISITED:
+            if self.M.at(i[0], i[1], i[2]) & VISITED == 0:
                 disponible += 1
 
         if disponible > 0:
@@ -66,8 +74,13 @@ class ai:
         return PATHFINDING
 
     def apply(self, act, success):
+        act = list(act)
+        self.pos = list(self.pos)
         act[1] = success
         sz = self.M.getsz()
+
+        if success < 0:
+            return False
 
         if act[0] == BACK or act[0] == LEFT:
             act[1] = -act[1]
@@ -84,15 +97,16 @@ class ai:
                     return False
                 self.pos[0] += act[1]
         elif act[0] == RIGHT or act[0] == LEFT:
-            self.d = (self.d + act[1] + 4)%4
+			print "waw"
+			self.d = (self.d + act[1] + 4)%4
         else:
             print("Unknown action " + act[0])
             return False
-        
         return True
 
     def accessible(self, result, x, y, f):
         sz = self.M.getsz()
+
         if x > 1 - sz and self.M.wall(x, y, f, 3) == False:
             result += [(x - 1, y, f)]
         if x < sz - 1 and self.M.wall(x, y, f, 1) == False:
@@ -123,26 +137,27 @@ class ai:
 
         while len(BFSQ) > 0 and found == False:
             while len(BFSQ) > 0 and found == False:
-                Next = BSFQ.popleft()
+                Next = BFSQ[0]
+                BFSQ = BFSQ[1:]
                 dist = Next[1]
                 Next = Next[0]
 
                 self.PFm[Next[0] + sz][Next[1] + sz] = dist
 
                 neighbors = []
-                accessible(neighbors, Next)
+                self.accessible(neighbors, Next[0], Next[1], Next[2])
                 for i in range(len(neighbors)):
                     tmp = neighbors[i]
 
-                    if self.M.at(tmp) & VISITED and PFm[tmp[0] + sz][tmp[1] +
+                    if self.M.at(tmp[0], tmp[1], tmp[2]) & VISITED and PFm[tmp[0] + sz][tmp[1] +
                             sz] == -1 and self.M.at(tmp) & RAMP == 0:
                         BFSQ += [(tmp, dist + 1)]
-                    elif self.M.at(tmp) & VISITED == 0:
+                    elif self.M.at(tmp[0], tmp[1], tmp[2]) & VISITED == 0:
                         found = True
                         unvisited = tmp
                         self.PFm[tmp[0] + sz][tmp[1] + sz] = dist + 1
 
-                    if self.M.at(tmp) & RAMP != 0:
+                    if self.M.at(tmp[0], tmp[1], tmp[2]) & RAMP != 0:
                         foundramp = True
                         ramp = tmp
                         self.PFm[tmp[0] + sz][tmp[1] + sz] = dist + 1
@@ -155,20 +170,22 @@ class ai:
 
         while self.PFm[path[-1][0] + sz][path[-1][1] + sz] != 1:
             possible = []
-            self.accessible(possible, path[-1])
+            self.accessible(possible, path[-1][0], path[-1][1], path[-1][2])
 
-            for i in len(possible):
+            for i in range(len(possible)):
                 tmp = possible[i]
 
                 if self.PFm[path[-1][0] + sz][path[-1][1] + sz] == self.PFm[tmp[0] + sz][tmp[1] + sz] + 1:
                     path += [tmp]
                     break
 
-    def translate_path(translated, path):
+    def translate_path(self, translated, path):
         tmppos = path[-1]
         tmpd = self.d
         while len(path) > 0:
             path.pop()
+            if len(path) == 0:
+                return
             if path[-1][1] == tmppos[1] - 1:
                 if tmpd != 0:
                     if tmpd == 3:
@@ -209,6 +226,10 @@ class ai:
         self.M.mark(self.pos[0], self.pos[1], self.pos[2], VISITED, True)
 
         color = kernel.color()
+        if color:
+            color = 1
+        else:
+            color = 0
 
         if color == 0:
             self.M.mark(self.pos[0], self.pos[1], self.pos[2], COLOR, False)
@@ -219,26 +240,22 @@ class ai:
             self.M.mark(self.pos[0], self.pos[1], self.pos[2], CHECK, True)
 
     def immediate(self):
-        preferable = [0, 1, 3, 2]
+        preferable = [FRONT, RIGHT, LEFT, BACK]
         available = []
-        accessible(available, self.pos)
-        for i in range(4):
-            pd = (4 + preferable[i] + d)%4
-            if pd == 0:
-                for j in available:
-                    if self.pos[0] == j[0] and  self.pos[1] - 1 == j[0]:
-                        return (FRONT, 1)
-            elif pd == 1:
-                for j in available:
-                    if self.pos[0] + 1 == j[0] and self.pos[1] == j[0]:
-                        return (RIGHT, 1)
-            elif pd == 2:
-                for j in available:
-                    if self.pos[0] == j[0] and self.pos[1] + 1 == j[0]:
-                        return (BACK, 1)
-            else:
-                for j in available:
-                    if self.pos[0] - 1 == j[0] and self.pos[1]:
-                        return (LEFT, 1)
+        self.accessible(available, self.pos[0], self.pos[1], self.pos[2])
+
+        print self.pos
+        print available
+
+        for i in preferable:
+            pd = (i + self.d)%4
+            if pd == 0 and ((self.pos[0], self.pos[1] - 1, self.pos[2]) in available):
+                return (i, 1)
+            if pd == 1 and ((self.pos[0] + 1, self.pos[1], self.pos[2]) in available):
+                return (i, 1)
+            if pd == 2 and ((self.pos[0], self.pos[1] + 1, self.pos[2]) in available):
+                return (i, 1)
+            if pd == 1 and ((self.pos[0] - 1, self.pos[1], self.pos[2]) in available):
+                return (i, 1)
         return(FRONT, 0)
                         

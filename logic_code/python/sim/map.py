@@ -36,6 +36,7 @@ class map:
     #    self.mark(coords[0], coords[1], coords[2], m, v)
 
     def setWall(self, x, y, f, d, v):
+        v = v == 0
         if d == 0:
             if y - 1 + self.sz == 0:
                 return
