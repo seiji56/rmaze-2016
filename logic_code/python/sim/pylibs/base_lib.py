@@ -39,7 +39,7 @@ def sumv(v1, v2):
 def wall_rel(side):
     global mappos
     #print side,':',haswall((side + mappos[2])%4)
-    return haswall((side + mappos[2])%4)
+    return distance(side) == 0
 
 def walk(cnt, stop):
     global actions
@@ -49,7 +49,7 @@ def walk(cnt, stop):
     wallr = wall_rel(3)
     walll = wall_rel(1)
     print mapv[(1, 0)]
-    print stop, wall_rel(3) == wallr, wall_rel(1) == walll, wall_rel(0) == False
+    print "pos",mappos
     while stop == False or (wall_rel(3) == wallr and wall_rel(1) == walll and
             wall_rel(0) == False and cnt > knt):
         if mappos[2] == 0:
@@ -61,6 +61,7 @@ def walk(cnt, stop):
         elif mappos[2] == 3:
             mappos[0] -= 1
         knt += 1
+        print stop, wall_rel(3) == wallr, wall_rel(1) == walll, wall_rel(0) == False
     if knt > 0:
         actions += ['F' + str(knt) if cnt >= 0 else 'B' + str(knt)]
     return knt
@@ -85,6 +86,9 @@ def isblack():
 def haswall(side):
     global mappos
     global mapv
+
+    side += mappos[2]
+    side %= 4
 
     #print "side:",side
 

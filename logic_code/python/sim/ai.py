@@ -222,7 +222,7 @@ class ai:
             
     def scan_tile(self):
         for i in range(4):
-            self.M.setWall(self.pos[0], self.pos[1], self.pos[2], i, (kernel.distance((i - self.d + 4)%4)))
+            self.M.setWall(self.pos[0], self.pos[1], self.pos[2], (i + self.d)%4, (kernel.distance(i)))
         self.M.mark(self.pos[0], self.pos[1], self.pos[2], VISITED, True)
 
         color = kernel.color()
@@ -249,13 +249,34 @@ class ai:
 
         for i in preferable:
             pd = (i + self.d)%4
+            aq = 1 
+            
             if pd == 0 and ((self.pos[0], self.pos[1] - 1, self.pos[2]) in available):
-                return (i, 1)
+                if i == 0:
+                    aq = 1
+                    while self.pos[1] - aq < self.M.sz and self.M.wall(self.pos[0],
+                            self.pos[1] - aq, self.pos[2], 0) == False and self.at(self.pos[0], self.pos[1] - aq, self.pos[2]) & VISITED == 0:
+                        aq += 1
+                return (i, aq)
             if pd == 1 and ((self.pos[0] + 1, self.pos[1], self.pos[2]) in available):
-                return (i, 1)
+                if i == 0:
+                    aq = 1
+                    while self.pos[0] + aq < self.M.sz and self.M.wall(self.pos[0] + aq, self.pos[1], self.pos[2], 0) == False and self.at(self.pos[0] + aq, self.pos[1], self.pos[2]) & VISITED == 0:
+                        aq += 1
+
+                return (i, aq)
             if pd == 2 and ((self.pos[0], self.pos[1] + 1, self.pos[2]) in available):
-                return (i, 1)
-            if pd == 1 and ((self.pos[0] - 1, self.pos[1], self.pos[2]) in available):
-                return (i, 1)
+                if i == 0:
+                    aq = 1
+                    while self.pos[1] + aq < self.M.sz and self.M.wall(self.pos[0], self.pos[1] + aq, self.pos[2], 0) == False and self.at(self.pos[0], self.pos[1] + aq, self.pos[2]) & VISITED == 0:
+                        aq += 1
+                return (i, aq)
+            if pd == 3 and ((self.pos[0] - 1, self.pos[1], self.pos[2]) in available):
+                if i == 0:
+                    aq = 1
+                    while self.pos[0] - aq < self.M.sz and self.M.wall(self.pos[0] - aq, self.pos[1], self.pos[2], 0) == False and self.at(self.pos[0] - aq, self.pos[1], self.pos[2]) & VISITED == 0:
+                        aq += 1
+
+                return (i, aq)
         return(FRONT, 0)
                         
