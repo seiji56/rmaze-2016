@@ -10,9 +10,9 @@ def apply(move):
     if move[0] == 0:
         return mv.walkf(move, dst_sth, col_sth, True)
     elif move[0] == 1:
-        return mv.turnr(move)
+        return mv.turnr(move, dst_sth)
     elif move[0] == 3:
-        return mv.turnl(move)
+        return mv.turnl(move, dst_sth)
     elif move[0] == 2:
         return mv.walkb(move, dst_sth, col_sth, True)
         

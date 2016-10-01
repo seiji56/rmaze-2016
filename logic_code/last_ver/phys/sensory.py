@@ -55,7 +55,7 @@ def distf():
     return (distfr() + 0*distfm() + distfl())/2
 
 def distr():
-    return (distrf() + 0*distrm() + distrl())/2
+    return (distrf() + 0*distrm() + distrb())/2
 
 def distb():
     return (distbr() + 0*distbm() + distbl())/2
@@ -105,3 +105,72 @@ def wr(sth):
 
 def color(sth):
     return False
+
+base_all = 880
+maxerr = 150
+def shouldAlign(sth):
+    if abs(latcorr(sth)) > maxerr:
+        return True
+    if abs(vertcorr(sth)) > maxerr:
+        return True
+    if abs(angcorr(sth)) > maxerr:
+        return True
+    return False
+
+def latcorr(sth):
+    corr = 0
+    cnt = 0
+    if wl(sth):
+        corr += distl() - base_all
+        cnt += 1
+    if wr(sth):
+        corr += base_all - distr()
+        cnt += 1
+    if cnt > 0:
+        corr /= cnt
+    if corr < -500:
+        corr = -500
+    elif corr > 500:
+        corr = 500
+    return corr
+
+def vertcorr(sth):
+    corr = 0
+    cnt = 0
+    if wb(sth):
+        corr += distb() - base_all
+        cnt += 1
+    if wf(sth):
+        corr += base_all - distf()
+        cnt += 1
+    if cnt > 0:
+        corr /= cnt
+    if corr < -500:
+        corr = -500
+    elif corr > 500:
+        corr = 500
+    return corr
+
+
+def angcorr(sth):
+    corr = 0
+    cnt = 0
+    if wl(sth):
+        corr += distlf() - distlb()
+        cnt += 1
+    if wr(sth):
+        corr += distrb() - distrf()
+        cnt += 1
+    if wf(sth):
+        corr += distfr() - distfl()
+        cnt += 1
+    if wb(sth):
+        corr += distbl() - distbr()
+        cnt += 1
+    if cnt > 0:
+        corr /= cnt
+    if corr < -500:
+        corr = -500
+    elif corr > 500:
+        corr = 500
+    return corr
