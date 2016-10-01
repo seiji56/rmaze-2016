@@ -91,4 +91,17 @@ def wlf(sth):
 def wlb(sth):
     return distlb() > sth
 
+def wf(sth):
+    return (distfr() + distfl())/2 > sth
 
+def wl(sth):
+    return (distlf() + distlb())/2 > sth
+
+def wb(sth):
+    return (distbr() + distbl())/2 > sth
+
+def wr(sth):
+    return (distrf() + distrb())/2 > sth
+
+def color(sth):
+    return False

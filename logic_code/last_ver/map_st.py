@@ -19,12 +19,30 @@ class Map:
         self.PFM = [[0 for y in range(-sy, sy + 1)] for x in range(-sx, 
             sx + 1)]
 
+    def printMap(self):
+        for y in range(0, 2*self.sy + 1):
+            line = ''
+            for x in range(0, 2*self.sx + 1):
+                tile = self.M[x][y]
+                line += '+'
+                line += '-' if tile.wallu else ' '
+            print line
+            line = ''
+            for x in range(0, 2*self.sx+ 1):
+                tile = self.M[x][y]
+                line += '|' if tile.walll else ' '
+                line += 'v' if tile.visited else ' '
+            print line
+
     def PF(self, init):
         path = []
         curr = 1
         done = False
         target = [-1, -1, -1]
-        self.PFM[x + sx][y + sy] = 1
+        self.PFM = [[0 for y in range(-self.sy, self.sy + 1)] for x in range(-self.sx, 
+            self.sx + 1)]
+ 
+        self.PFM[init[0] + self.sx][init[1] + self.sy] = 1
         while not done:
             done = True
             for x in range(1, 2 * self.sx):
@@ -69,40 +87,48 @@ class Map:
         return path
 
     def visited(self, tile):
-        return self.M[tile[0]][tile[1]].visited
+        return self.M[tile[0] + self.sx][tile[1] + self.sy].visited
 
     def setVisited(self, tile, val = True):
-        self.M[tile[0]][tile[1]].visited = val
+        self.M[tile[0] + self.sx][tile[1] + self.sy].visited = val
 
     def isblack(self, tile):
-        return self.M[tile[0]][tile[1]].isblack
+        return self.M[tile[0] + self.sx][tile[1] + self.sy].isblack
 
     def setBlack(self, tile, val = True):
-        self.M[tile[0]][tile[1]].isblack = val
+        self.M[tile[0] + self.sx][tile[1] + self.sy].isblack = val
 
     def wallu(self, tile):
-        return self.M[tile[0]][tile[1]].wallu
+        return self.M[tile[0] + self.sx][tile[1] + self.sy].wallu
 
     def setWallu(self, tile, val):
-        self.M[tile[0]][tile[1]].wallu = val
+        if val:
+            print "Wall UP set"
+        self.M[tile[0] + self.sx][tile[1] + self.sy].wallu = val
 
     def wallr(self, tile):
-        return self.M[tile[0] + 1][tile[1]].walll
+        return self.M[tile[0] + self.sx + 1][tile[1] + self.sy].walll
 
     def setWallr(self, tile, val):
-        self.M[tile[0] + 1][tile[1]].walll = val
+        if val:
+            print "Wall RIGHT set"
+        self.M[tile[0] + self.sx + 1][tile[1] + self.sy].walll = val
 
     def walld(self, tile):
-        return self.M[tile[0]][tile[1] + 1].wallu
+        return self.M[tile[0] + self.sx][tile[1] + self.sy + 1].wallu
 
     def setWalld(self, tile, val):
-        self.M[tile[0]][tile[1] + 1].wallu = val
+        if val:
+            print "Wall DOWN set"
+        self.M[tile[0] + self.sx][tile[1] + self.sy + 1].wallu = val
         
     def walll(self, tile):
-        return self.M[tile[0]][tile[1]].walll
+        return self.M[tile[0] + self.sx][tile[1] + self.sy].walll
 
     def setWalll(self, tile, val):
-        self.M[tile[0]][tile[1]].walll = val
+        if val:
+            print "Wall LEFT set"
+        self.M[tile[0] + self.sx][tile[1] + self.sy].walll = val
 
     def wallto(self, tile, side):
         if side == 0:
@@ -110,16 +136,16 @@ class Map:
         if side == 1:
             return self.wallr(tile)
         if side == 2:
-            return self.walkd(tile)
+            return self.walld(tile)
         if side == 3:
             return self.walll(tile)
 
     def setWallTo(self, tile, side, val):
         if side == 0:
-            setWallu(tile, val)
+            self.setWallu(tile, val)
         elif side == 1:
-            setWallr(tile, val)
+            self.setWallr(tile, val)
         elif side == 2:
-            setWalld(tile, val)
+            self.setWalld(tile, val)
         elif side == 3:
-            setWalll(tile, val)
+            self.setWalll(tile, val)

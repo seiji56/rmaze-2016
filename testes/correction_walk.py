@@ -11,17 +11,19 @@ ALL = herkulex.servo(0xfe)
 
 #power = 1000
 power = 1000
-#rtime = 1.54
-rtime = 20
+rtime = 1.54
+#rtime = 20
 calib = 0
 calib = -50
 
+corrpow = -300
+
 ALL.torque_on()
 
-FR.set_servo_speed(-power, 0x06)
-FL.set_servo_speed(power + calib, 0x06)
-BR.set_servo_speed(-power, 0x06)
-BL.set_servo_speed(power + calib, 0x06)
+FR.set_servo_speed(-power + corrpow, 0x06)
+FL.set_servo_speed(power + corrpow + calib, 0x06)
+BR.set_servo_speed(-power - corrpow, 0x06)
+BL.set_servo_speed(power - corrpow + calib, 0x06)
 
 time.sleep(rtime)
 

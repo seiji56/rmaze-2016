@@ -5,6 +5,7 @@ dst_sth = 400
 col_sth = 500
 
 def apply(move):
+    move = list(move)
     move[1] = 1
     if move[0] == 0:
         return mv.walkf(move, dst_sth, col_sth)
@@ -27,7 +28,7 @@ def wallr():
 def wallb():
     return sn.wb(dst_sth)
 
-def wallb():
+def walll():
     return sn.wl(dst_sth)
 
 def isblack():

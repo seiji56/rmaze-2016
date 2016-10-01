@@ -10,17 +10,17 @@ class AI:
 
     def to_the(self, side):
         gdir = self.conv_tog(side)
-        return s_to_coords(gdir)
+        return self.s_to_coords(gdir)
 
     def s_to_coords(self, gdir):
         if gdir == 0:
-            return [self.pos[0] - 1, self.pos[1]]
-        if gdir == 1:
-            return [self.pos[0], self.pos[1] + 1]
-        if gdir == 2:
-            return [self.pos[0] + 1, self.pos[1]]
-        if gdir == 3:
             return [self.pos[0], self.pos[1] - 1]
+        if gdir == 1:
+            return [self.pos[0] + 1, self.pos[1]]
+        if gdir == 2:
+            return [self.pos[0], self.pos[1] + 1]
+        if gdir == 3:
+            return [self.pos[0] - 1, self.pos[1]]
 
     def conv_tog(self, side):
         return (side + self.d)%4
@@ -28,19 +28,20 @@ class AI:
     def immediate(self):
         if self.memory.isblack(self.pos):
             return (2, 1)
-        if not self.memory.wallto(self.pos, conv_tog(0)):
+        if not self.memory.wallto(self.pos, self.conv_tog(0)):
             return (0, 1)
-        if not self.memory.wallto(self.pos, conv_tog(1)):
+        if not self.memory.wallto(self.pos, self.conv_tog(1)):
             return (1, 1)
-        if not self.memory.wallto(self.pos, conv_tog(3)):
+        if not self.memory.wallto(self.pos, self.conv_tog(3)):
             return (3, 1)
+        return (1, 2)
 
     def method(self):
         if self.memory.isblack(self.pos):
             return 0
         for i in range(4):
             if not self.memory.wallto(self.pos, 
-                    i) and not self.memory.visited(s_to_coords(i)):
+                    i) and not self.memory.visited(self.s_to_coords(i)):
                 return 0
         return 1
 
@@ -52,6 +53,7 @@ class AI:
             return (1, rcnt)
 
     def apply(self, action):
+        print "Applying:",action
         if action[0] == 0 or action[0] == 2:
             for i in range(action[1]):
                 self.pos = self.to_the(action[0])
@@ -66,6 +68,7 @@ class AI:
     def PF(self):
         aclst = []
         path = self.memory.PF(self.pos)
+        print "Map found path:",path
         if len(path) == 0:
             return False
         for i in range(0, len(path) - 1):
@@ -110,8 +113,14 @@ class AI:
         walls += [kernel.walll()]
 
         for i in range(4):
-            self.memory.setWallTo(self.pos, conv_tog(i), walls[i])
+            print "Wall to",i,":",walls[i]
+
+        for i in range(4):
+            if i != 2:
+                self.memory.setWallTo(self.pos, self.conv_tog(i), walls[i])
         self.memory.setBlack(self.pos, kernel.isblack())
+        self.memory.setVisited(self.pos)
+        self.memory.printMap()
         #
         #if kernel.isramp():
         #    secfloor = AI()
@@ -127,23 +136,25 @@ class AI:
     def loop(self):
         over = False
         while not over:
-            scan_tile()
-            if len(queued) > 0:
-                action = queued[0]
+            self.scan_tile()
+            if len(self.queued) > 0:
+                action = self.queued[0]
+                print "que TODO:",action
                 success = kernel.apply(action)
                 self.apply(success)
                 if success != action:
-                    queued = queued[1:]
+                    self.queued = self.queued[1:]
                 else:
-                    queued = []
+                    self.queued = []
 
             met = self.method()
             if met == 0:
-                action = immediate()
+                action = self.immediate()
+                print "imm TODO:",action
                 success = kernel.apply(action)
                 self.apply(success)
             elif met == 1:
-                actions = PF()
+                actions = self.PF()
                 if actions == False:
                     over = not goback()
                 else:
