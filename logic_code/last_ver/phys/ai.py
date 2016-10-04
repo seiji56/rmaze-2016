@@ -1,5 +1,6 @@
 from map_st import *
 import kernel
+import time
 
 class AI:
     def __init__(self):
@@ -28,11 +29,17 @@ class AI:
     def immediate(self):
         if self.memory.isblack(self.pos):
             return (2, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(0)):
+        if not self.memory.wallto(self.pos,
+                self.conv_tog(0)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(0))):
             return (0, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(1)):
+        if not self.memory.wallto(self.pos, 
+                self.conv_tog(1)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(1))):
             return (1, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(3)):
+        if not self.memory.wallto(self.pos, 
+                self.conv_tog(3)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(3))):
             return (3, 1)
         return (1, 2)
 
@@ -41,7 +48,8 @@ class AI:
             return 0
         for i in range(4):
             if not self.memory.wallto(self.pos, 
-                    i) and not self.memory.visited(self.s_to_coords(i)):
+                    i) and not self.memory.visited(
+                    self.s_to_coords(self.conv_tog(i))):
                 return 0
         return 1
 
@@ -148,6 +156,8 @@ class AI:
     def loop(self):
         over = False
         while not over:
+            time.sleep(1)
+            kernel.printMap()
             self.scan_tile()
             if len(self.queued) > 0:
                 action = self.queued[0]

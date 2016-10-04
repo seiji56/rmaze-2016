@@ -1,5 +1,6 @@
 from map_st import *
 import kernel
+import time
 
 class AI:
     def __init__(self):
@@ -28,11 +29,17 @@ class AI:
     def immediate(self):
         if self.memory.isblack(self.pos):
             return (2, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(0)):
+        if not self.memory.wallto(self.pos,
+                self.conv_tog(0)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(0))):
             return (0, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(1)):
+        if not self.memory.wallto(self.pos, 
+                self.conv_tog(1)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(1))):
             return (1, 1)
-        if not self.memory.wallto(self.pos, self.conv_tog(3)):
+        if not self.memory.wallto(self.pos, 
+                self.conv_tog(3)) and not self.memory.visited(
+                        self.s_to_coords(self.conv_tog(3))):
             return (3, 1)
         return (1, 2)
 
@@ -41,11 +48,13 @@ class AI:
             return 0
         for i in range(4):
             if not self.memory.wallto(self.pos, 
-                    i) and not self.memory.visited(self.s_to_coords(i)):
+                    i) and not self.memory.visited(
+                    self.s_to_coords(self.conv_tog(i))):
                 return 0
         return 1
 
     def turnMove(self, d0, d1):
+        print "Has to turn from",d0,"to",d1
         rcnt = (d1 - d0 + 4)%4
         if rcnt == 3:
             return (3, 1)
@@ -65,27 +74,30 @@ class AI:
             self.d -= action[1]
             self.d %= 4
 
-    def PF(self):
+    def PF(self, targ = -1):
         aclst = []
-        path = self.memory.PF(self.pos)
-        print "Map found path:",path
+        path = self.memory.PF(self.pos, targ)
+        print "Map found path:", path
         if len(path) == 0:
             return False
+        td = self.d
         for i in range(0, len(path) - 1):
             diff = (path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1])
-            td = 0
+            nd = 0
+            print "Diff:",diff
             if diff == (0, -1): 
-                td = 0
+                nd = 0
             elif diff == (1, 0):
-                td = 1
+                nd = 1
             elif diff == (0, 1):
-                td = 2
+                nd = 2
             elif diff == (-1, 0):
-                td = 3
+                nd = 3
             else:
                 return (-1, -1)
-            if td != self.d:
-                aclst = [turnMove(self.d, td)] + aclst
+            if td != nd:
+                aclst = [self.turnMove(td, nd)] + aclst
+                td = nd
             
             aclst = [(0, 1)] + aclst
 
@@ -102,7 +114,7 @@ class AI:
                 fcnt += 1
             else:
                 finlist = [i] + finlist
-        
+        print "Generated action list:",finlist
         return finlist
 
     def scan_tile(self):
@@ -131,11 +143,21 @@ class AI:
         #    kernel.goramp()
 
     def goback(self):
-        return False
+        if self.pos == [0, 0]:
+            print "Already here!"
+            return False
+        print "Going back..."
+        actions = self.PF(self.pos)
+        if not actions:
+            return False
+        self.queued += actions
+        return True
 
     def loop(self):
         over = False
         while not over:
+            time.sleep(1)
+            kernel.printMap()
             self.scan_tile()
             if len(self.queued) > 0:
                 action = self.queued[0]
@@ -146,16 +168,16 @@ class AI:
                     self.queued = self.queued[1:]
                 else:
                     self.queued = []
-
-            met = self.method()
-            if met == 0:
-                action = self.immediate()
-                print "imm TODO:",action
-                success = kernel.apply(action)
-                self.apply(success)
-            elif met == 1:
-                actions = self.PF()
-                if actions == False:
-                    over = not goback()
-                else:
-                    self.queued += actions
+            else:
+                met = self.method()
+                if met == 0:
+                    action = self.immediate()
+                    print "imm TODO:",action
+                    success = kernel.apply(action)
+                    self.apply(success)
+                elif met == 1:
+                    actions = self.PF()
+                    if actions == False:
+                        over = not self.goback()
+                    else:
+                        self.queued += actions
