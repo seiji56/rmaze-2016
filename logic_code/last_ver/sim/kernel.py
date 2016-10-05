@@ -129,6 +129,24 @@ def walkf(move, dst_sth, col_sth, stop):
 	ret += 1
     return (move[0], ret)
 
+def walkb(move, dst_sth, col_sth, stop):
+    global rx
+    global ry
+    global rd
+    walls = (wallr(), walll())
+    ret = 0
+    while ret < move[1] and (not stop or walls == (wallr(), walll())):
+        if rd == 0:
+            ry += 1
+        elif rd == 1:
+            rx -= 1
+        elif rd == 2:
+            ry -= 1
+        elif rd == 3:
+            rx += 1
+        ret += 1
+    return (move[0], ret)
+
 def turnr(move, dst_sth):
     global rd
     rd += move[1]

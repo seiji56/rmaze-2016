@@ -31,7 +31,11 @@ class Map:
             for x in range(0, 2*self.sx+ 1):
                 tile = self.M[x][y]
                 line += '|' if tile.walll else ' '
+                if tile.isblack:
+                    line += '\033[40m'
                 line += 'v' if tile.visited else ' '
+                if tile.isblack:
+                    line += '\033[00m'
             print line
 
     def PF(self, init, targ = -1):
@@ -39,43 +43,46 @@ class Map:
         curr = 1
         done = False
         found_target = False
-        spec = type(targ) is list
+        spec = targ != -1
         target = [-1, -1, -1]
         self.PFM = [[0 for y in range(-self.sy, self.sy + 1)] for x in range(-self.sx, 
             self.sx + 1)]
- 
+
+        if targ != -1:
+            targ = (targ[0] + self.sx, targ[1] + self.sy)
+
         self.PFM[init[0] + self.sx][init[1] + self.sy] = 1
         while not done and not found_target:
             done = True
-            for x in range(1, 2*self.sx):
-                for y in range(1, 2*self.sy):
+            for x in range(0, 2*self.sx + 1):
+                for y in range(0, 2*self.sy + 1):
                     if (not spec and not self.M[x][y].visited and self.PFM[x][y]
-                            == curr) or (spec and self.PFM[x][y] == curr and [x,
-                                    y] == targ):
+                            == curr) or (spec and self.PFM[x][y] == curr and (x,
+                                y) == targ):
                         print "Found target at",(x, y)
                         target = [x, y, curr]
                         found_target = True
                     if self.PFM[x][y] == curr:
                         print "For",(x,y)
-                        if self.PFM[x][y - 1] == 0 and not self.wallu((x -
+                        if y - 1 > 0 and self.PFM[x][y - 1] == 0 and not self.wallu((x -
                             self.sx, y - self.sy)
                                 ) and not self.M[x][y - 1].isblack:
                             self.PFM[x][y - 1] = curr + 1
                             print "Ok at",(x, y - 1)
                             done = False
-                        if self.PFM[x + 1][y] == 0 and not self.wallr((x -
+                        if x + 1 < 2*self.sy and self.PFM[x + 1][y] == 0 and not self.wallr((x -
                             self.sx, y - self.sy)
                                 ) and not self.M[x + 1][y].isblack:
                             self.PFM[x + 1][y] = curr + 1
                             print "Ok at",(x + 1, y)
                             done = False
-                        if self.PFM[x][y + 1] == 0 and not self.walld((x -
+                        if y + 1 < 2*self.sy and self.PFM[x][y + 1] == 0 and not self.walld((x -
                             self.sx, y - self.sy)
                                 ) and not self.M[x][y + 1].isblack:
                             self.PFM[x][y + 1] = curr + 1
                             print "Ok at",(x, y + 1)
                             done = False
-                        if self.PFM[x - 1][y] == 0 and not self.walll((x -
+                        if x - 1 > 0 and self.PFM[x - 1][y] == 0 and not self.walll((x -
                             self.sx, y - self.sy)
                                 ) and not self.M[x - 1][y].isblack:
                             self.PFM[x - 1][y] = curr + 1
@@ -109,6 +116,10 @@ class Map:
                 line += " "
                 line += str(self.PFM[x][y])
             print line
+        print path
+        if tuple(init) in path:
+            index = path.index(tuple(init))
+            path = path[index:]
         return path
 
     def visited(self, tile):

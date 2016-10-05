@@ -47,8 +47,8 @@ class AI:
         if self.memory.isblack(self.pos):
             return 0
         for i in range(4):
-            if not self.memory.wallto(self.pos, 
-                    i) and not self.memory.visited(
+            if not self.memory.wallto(self.pos,
+                    self.conv_tog(i)) and not self.memory.visited(
                     self.s_to_coords(self.conv_tog(i))):
                 return 0
         return 1
@@ -101,7 +101,9 @@ class AI:
             
             aclst = [(0, 1)] + aclst
 
-        fcnt = 0
+        fcnt = 0 
+
+        print "Brute aclist:",aclst
 
         finlist = []
 
@@ -114,6 +116,8 @@ class AI:
                 fcnt += 1
             else:
                 finlist = [i] + finlist
+        if fcnt > 0:
+            finlist = [(0, fcnt)] + finlist
         print "Generated action list:",finlist
         return finlist
 
@@ -147,7 +151,7 @@ class AI:
             print "Already here!"
             return False
         print "Going back..."
-        actions = self.PF(self.pos)
+        actions = self.PF([0, 0])
         if not actions:
             return False
         self.queued += actions
