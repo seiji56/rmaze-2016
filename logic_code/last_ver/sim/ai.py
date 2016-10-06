@@ -3,11 +3,12 @@ import kernel
 import time
 
 class AI:
-    def __init__(self):
+    def __init__(self, ramp = True):
         self.memory = Map(10, 10)
         self.pos = [0, 0]
         self.d = 0
         self.queued = []
+        self.checkramp = ramp
 
     def to_the(self, side):
         gdir = self.conv_tog(side)
@@ -137,14 +138,31 @@ class AI:
         self.memory.setBlack(self.pos, kernel.isblack())
         self.memory.setVisited(self.pos)
         self.memory.printMap()
-        #
-        #if kernel.isramp():
-        #    secfloor = AI()
-        #    secfloor.memory.setWallu(True)
-        #    secfloor.memory.setWallr(False)
-        #    secfloor.memory.setWalll(True)
-        #    secfloor.memory.setWalld(True)
-        #    kernel.goramp()
+        
+        if kernel.isramp() and self.checkramp:
+            self.memory.setBlack()
+            self.apply((1, 1))
+            self.apply((0, 1))
+
+            secfloor = AI(False)
+            secfloor.memory.setVisited((0, 0))
+            secfloor.memory.setBlack((0, 0))
+            secfloor.apply((0, 1))
+            secfloor.memory.setVisited((0, -1))
+            secfloor.memory.setWallu((0, -1), False)
+            secfloor.memory.setWallr((0, -1), True)
+            secfloor.memory.setWalll((0, -1), True)
+            secfloor.memory.setWalld((0, -1), False)
+            secfloor.apply((0, 1))
+            secfloor.memory.setVisited((0, -2))
+            secfloor.memory.setWallu((0, -2), True)
+            secfloor.memory.setWallr((0, -2), False)
+            secfloor.memory.setWalll((0, -2), True)
+            secfloor.memory.setWalld((0, -2), False)
+
+            kernel.upramp()
+            secfloor.loop()
+            kernel.downramp()
 
     def goback(self):
         if self.pos == [0, 0]:
