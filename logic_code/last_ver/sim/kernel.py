@@ -119,7 +119,7 @@ def printMap():
                 sl += '\033[40m'
                 black = True
             if (x, y) == (rx2, ry2) and m == 1:
-                if rd == 0:
+                if rd2 == 0:
                     sl += '^'
                 elif rd2 == 1:
                     sl += '>'
@@ -182,8 +182,8 @@ def upramp():
 def downramp():
     global m
     m = 0
-    turnr((1, 2))
-    walkf((0, 1))
+    apply((1, 2))
+    apply((0, 1))
 
 
 def walkf(move, dst_sth, col_sth, stop):

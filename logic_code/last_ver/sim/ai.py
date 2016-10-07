@@ -3,12 +3,14 @@ import kernel
 import time
 
 class AI:
-    def __init__(self, ramp = True):
+    def __init__(self, must_print = False, ramp = True):
         self.memory = Map(10, 10)
         self.pos = [0, 0]
         self.d = 0
         self.queued = []
         self.checkramp = ramp
+        self.mprint = must_print
+        self.memory.setPrint(must_print)
 
     def to_the(self, side):
         gdir = self.conv_tog(side)
@@ -55,7 +57,8 @@ class AI:
         return 1
 
     def turnMove(self, d0, d1):
-        print "Has to turn from",d0,"to",d1
+        if self.mprint:
+            print "Has to turn from",d0,"to",d1
         rcnt = (d1 - d0 + 4)%4
         if rcnt == 3:
             return (3, 1)
@@ -63,7 +66,8 @@ class AI:
             return (1, rcnt)
 
     def apply(self, action):
-        print "Applying:",action
+        if self.mprint:
+            print "Applying:",action
         if action[0] == 0 or action[0] == 2:
             for i in range(action[1]):
                 self.pos = self.to_the(action[0])
@@ -78,14 +82,16 @@ class AI:
     def PF(self, targ = -1):
         aclst = []
         path = self.memory.PF(self.pos, targ)
-        print "Map found path:", path
+        if self.mprint:
+            print "Map found path:", path
         if len(path) == 0:
             return False
         td = self.d
         for i in range(0, len(path) - 1):
             diff = (path[i + 1][0] - path[i][0], path[i + 1][1] - path[i][1])
             nd = 0
-            print "Diff:",diff
+            if self.mprint:
+                print "Diff:",diff
             if diff == (0, -1): 
                 nd = 0
             elif diff == (1, 0):
@@ -104,7 +110,8 @@ class AI:
 
         fcnt = 0 
 
-        print "Brute aclist:",aclst
+        if self.mprint:
+            print "Brute aclist:",aclst
 
         finlist = []
 
@@ -119,7 +126,9 @@ class AI:
                 finlist = [i] + finlist
         if fcnt > 0:
             finlist = [(0, fcnt)] + finlist
-        print "Generated action list:",finlist
+
+        if self.mprint:
+            print "Generated action list:",finlist
         return finlist
 
     def scan_tile(self):
@@ -129,36 +138,32 @@ class AI:
         walls += [kernel.wallb()]
         walls += [kernel.walll()]
 
-        for i in range(4):
-            print "Wall to",i,":",walls[i]
+        if self.mprint:
+            for i in range(4):
+                print "Wall to",i,":",walls[i]
 
         for i in range(4):
             if i != 2:
                 self.memory.setWallTo(self.pos, self.conv_tog(i), walls[i])
         self.memory.setBlack(self.pos, kernel.isblack())
         self.memory.setVisited(self.pos)
-        self.memory.printMap()
+        if self.mprint:
+            self.memory.printMap()
         
         if kernel.isramp() and self.checkramp:
-            self.memory.setBlack()
-            self.apply((1, 1))
+            self.memory.setBlack(self.pos)
+            self.apply((1, 2))
             self.apply((0, 1))
 
-            secfloor = AI(False)
+            secfloor = AI(self.mprint, False)
+            secfloor.memory.setVisited((0, 1))
+            secfloor.memory.setBlack((0, 1))
             secfloor.memory.setVisited((0, 0))
-            secfloor.memory.setBlack((0, 0))
+            secfloor.memory.setWallu((0, 0), False)
+            secfloor.memory.setWallr((0, 0), True)
+            secfloor.memory.setWalll((0, 0), True)
+            secfloor.memory.setWalld((0, 0), False)
             secfloor.apply((0, 1))
-            secfloor.memory.setVisited((0, -1))
-            secfloor.memory.setWallu((0, -1), False)
-            secfloor.memory.setWallr((0, -1), True)
-            secfloor.memory.setWalll((0, -1), True)
-            secfloor.memory.setWalld((0, -1), False)
-            secfloor.apply((0, 1))
-            secfloor.memory.setVisited((0, -2))
-            secfloor.memory.setWallu((0, -2), True)
-            secfloor.memory.setWallr((0, -2), False)
-            secfloor.memory.setWalll((0, -2), True)
-            secfloor.memory.setWalld((0, -2), False)
 
             kernel.upramp()
             secfloor.loop()
@@ -166,9 +171,11 @@ class AI:
 
     def goback(self):
         if self.pos == [0, 0]:
-            print "Already here!"
+            if self.mprint:
+                print "Already here!"
             return False
-        print "Going back..."
+        if self.mprint:
+            print "Going back..."
         actions = self.PF([0, 0])
         if not actions:
             return False
@@ -178,15 +185,16 @@ class AI:
     def loop(self):
         over = False
         while not over:
-            time.sleep(1)
+            time.sleep(.2)
             kernel.printMap()
             self.scan_tile()
             if len(self.queued) > 0:
                 action = self.queued[0]
-                print "que TODO:",action
+                if self.mprint:
+                    print "que TODO:",action
                 success = kernel.apply(action)
                 self.apply(success)
-                if success != action:
+                if tuple(success) == tuple(action):
                     self.queued = self.queued[1:]
                 else:
                     self.queued = []
@@ -194,7 +202,8 @@ class AI:
                 met = self.method()
                 if met == 0:
                     action = self.immediate()
-                    print "imm TODO:",action
+                    if self.mprint:
+                        print "imm TODO:",action
                     success = kernel.apply(action)
                     self.apply(success)
                 elif met == 1:

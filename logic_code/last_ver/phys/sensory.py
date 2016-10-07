@@ -1,6 +1,7 @@
 import time
 import os
 import Adafruit_ADS1x15
+import adxl345
 
 milli_time = lambda: int(round(time.time() * 1000))
 
@@ -8,6 +9,8 @@ adcf = Adafruit_ADS1x15.ADS1015(address=0x49, busnum=1)
 adcl = Adafruit_ADS1x15.ADS1015(address=0x4a, busnum=1)
 adcr = Adafruit_ADS1x15.ADS1015(address=0x48, busnum=1)
 adcb = Adafruit_ADS1x15.ADS1015(address=0x4b, busnum=1)
+
+accel = adxl345.ADXL345()
 
 GAIN = 1
 
@@ -100,13 +103,13 @@ def wl(sth):
 def wb(sth):
     return (distbr() + distbl())/2 > sth
 
-def wr(sth):
+def wr(stha):
     return (distrf() + distrb())/2 > sth
 
-def color(sth):
+def color(scth):
     return False
 
-base_all = 880
+base_all = 800
 maxerr = 150
 def shouldAlign(sth):
     if abs(latcorr(sth)) > maxerr:
@@ -174,3 +177,8 @@ def angcorr(sth):
     elif corr > 500:
         corr = 500
     return corr
+
+
+def isramp():
+    axes = accel.getAxes(True)
+    dot = 

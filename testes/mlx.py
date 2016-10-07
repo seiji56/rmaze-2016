@@ -27,6 +27,7 @@ print('Reading MLX at ' + hex(addr) + ' temp. difference, press Ctrl-C to quit..
 while True:
     ltime = milli_time()
     try:
+        tmp2 = mlx.readObject()
         temperature = mlx.getDifference()
     except IOError:
         print('Could not read sensor.')

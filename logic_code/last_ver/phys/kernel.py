@@ -33,3 +33,6 @@ def walll():
 
 def isblack():
     return sn.color(col_sth)
+
+def isramp():
+    return sn.isramp()
