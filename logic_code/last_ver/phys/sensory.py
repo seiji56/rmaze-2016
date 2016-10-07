@@ -1,5 +1,6 @@
 import time
 import os
+import math
 import Adafruit_ADS1x15
 import adxl345
 
@@ -178,7 +179,10 @@ def angcorr(sth):
         corr = 500
     return corr
 
-
+maxrdeg = 10
 def isramp():
     axes = accel.getAxes(True)
-    dot = 
+    modv = math.sqrt(axes['x']**2 + axes['y']**2 + axes['z']**2)
+    dot = (-axes['z'])/modv
+    maxrad = maxdeg*math.pi/180
+    return math.acos(dot) > maxrad

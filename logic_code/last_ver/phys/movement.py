@@ -129,8 +129,6 @@ def walkf(move, dst_sth = 400, col_sth = 500, scstop = False, scuse = False, old
 rotpow = 1000
 rottime = 1 # per 90 dg
 def turnr(move, dst_sth = 400):
-#    if sn.shouldAlign(dst_sth):
-#        align(.5)
     basepow = [rotpow for i in range(4)]
     setPow(basepow, 0, 0)
 
@@ -140,8 +138,6 @@ def turnr(move, dst_sth = 400):
     return move
 
 def turnl(move, dst_sth = 400):
-#    if sn.shouldAlign(dst_sth):
-#        align(.5)
     basepow = [-rotpow for i in range(4)]
     setPow(basepow, 0, 0)
 
@@ -149,3 +145,13 @@ def turnl(move, dst_sth = 400):
 
     stop()
     return move
+
+def upramp():
+    basepow = [-walkpow, walkpow + walkcalib,
+            -walkpow, walkpow + walkcalib]
+    while sn.isramp():
+        setPow(basepow, sn.latcorr(dst_sth), sn.angcorr())
+    walkf((0, .3))
+
+def downramp():
+    upramp()

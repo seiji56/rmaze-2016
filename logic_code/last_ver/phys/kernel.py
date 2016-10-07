@@ -15,7 +15,13 @@ def apply(move):
         return mv.turnl(move, dst_sth)
     elif move[0] == 2:
         return mv.walkb(move, dst_sth, col_sth, True)
-        
+
+def upramp():
+    mv.upramp()
+
+def downramp():
+    mv.downramp()
+
 def align():
     return
 
