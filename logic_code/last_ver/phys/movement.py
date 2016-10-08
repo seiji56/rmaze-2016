@@ -1,14 +1,16 @@
 import herkulex
 import time
+import thread
 import sensory as sn
 
 herkulex.connect("/dev/ttyAMA0", 115200)
 
-FR  = herkulex.servo(0xfd)
-FL  = herkulex.servo(16)
-BR  = herkulex.servo(10)
-BL  = herkulex.servo(20)
-ALL = herkulex.servo(0xfe)
+FR   = herkulex.servo(0xfd)
+FL   = herkulex.servo(16)
+BR   = herkulex.servo(10)
+BL   = herkulex.servo(20)
+DROP = herkulex.servo(50)
+ALL  = herkulex.servo(0xfe)
 
 ALL.torque_on()
 
@@ -35,17 +37,35 @@ def setPow(pots, latcorr = 0, angcorr = 0):
         BL.set_servo_speed(pots[3] - latcorr + angcorr, 0x06)
     ALL.set_led(0x06)
 
+hasvictim = -1
+readmlx = True
+def mlxvchk():
+    global hasvictim
+    while readmlx:
+        vic = sn.hasvictim()
+        if vic >= 0:
+            hasvictim = vic
+
 walkpow = 1000
 walktime = 1.54
 sensordfront = 0
 sensordback = 0
 walkcalib = -50
 expft = .5
-def walkf(move, dst_sth = 400, col_sth = 500, scstop = False, scuse = False, old
-        = True, corr = False):
+def walkf(move, dst_sth = 400, col_sth = 500, scstop = False, scuse = False, 
+        old = True, corr = False):
+    global readmlx
+    global hasvictim
     start = time.time()
     basepow = [-walkpow, walkpow + walkcalib,
             -walkpow, walkpow + walkcalib]
+
+    mlxthread = 0
+
+    if move[1] == 1:
+        readmlx = True
+        hasvictim = -1
+        mlxthread = start_new_thread(mlxvchk, ())
 
     if sn.shouldAlign(dst_sth):
         align(.5)
@@ -124,6 +144,10 @@ def walkf(move, dst_sth = 400, col_sth = 500, scstop = False, scuse = False, old
         time.sleep(walktime*move[1])
 
     stop()
+    readmlx = False
+    if hasvictim >= 0:
+        act = drop(hasvictim)
+        move = [act, move]
     return move
 
 rotpow = 1000
@@ -155,3 +179,20 @@ def upramp():
 
 def downramp():
     upramp()
+
+def drop(side):
+    ret = None
+    if side == 0:
+        ret = (1, 2)
+    elif side == 1:
+        ret = (1, 1)
+    elif side == 3:
+        ret = (3, 1)
+    apply(ret)
+    DROP.set_servo_angle(0, 1, 0x08)
+    time.sleep(1)
+    DROP.set_servo_angle(-95, 1, 0x08)
+    time.sleep(1)
+    DROP.set_servo_speed(1, 0x06)
+    ALL.set_led(0x06)
+    return ret

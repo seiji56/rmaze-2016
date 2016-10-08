@@ -3,7 +3,7 @@ import kernel
 import time
 
 class AI:
-    def __init__(self, must_print = False, ramp = True):
+    def __init__(self, must_print = True, ramp = True):
         self.memory = Map(10, 10)
         self.pos = [0, 0]
         self.d = 0
@@ -66,6 +66,10 @@ class AI:
             return (1, rcnt)
 
     def apply(self, action):
+        if action[0] is list or action[0] is tuple:
+            for act in action:
+                self.apply(act)
+            return
         if self.mprint:
             print "Applying:",action
         if action[0] == 0 or action[0] == 2:
@@ -155,7 +159,7 @@ class AI:
             self.apply((1, 2))
             self.apply((0, 1))
 
-            secfloor = AI(self.mprint, False)
+            secfloor = AI(False, self.mprint)
             secfloor.memory.setVisited((0, 1))
             secfloor.memory.setBlack((0, 1))
             secfloor.memory.setVisited((0, 0))
@@ -186,7 +190,7 @@ class AI:
         over = False
         while not over:
             time.sleep(.2)
-            kernel.printMap()
+            #kernel.printMap()
             self.scan_tile()
             if len(self.queued) > 0:
                 action = self.queued[0]

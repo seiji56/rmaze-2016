@@ -66,6 +66,10 @@ class AI:
             return (1, rcnt)
 
     def apply(self, action):
+        if action[0] is list or action[0] is tuple:
+            for act in action:
+                self.apply(act)
+            return
         if self.mprint:
             print "Applying:",action
         if action[0] == 0 or action[0] == 2:

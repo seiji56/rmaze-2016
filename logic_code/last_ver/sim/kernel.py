@@ -178,6 +178,7 @@ def isramp():
 def upramp():
     global m
     m = 1
+    apply((0, 1))
 
 def downramp():
     global m

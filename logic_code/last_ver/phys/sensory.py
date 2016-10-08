@@ -3,6 +3,7 @@ import os
 import math
 import Adafruit_ADS1x15
 import adxl345
+import herkulex
 
 milli_time = lambda: int(round(time.time() * 1000))
 
@@ -186,3 +187,8 @@ def isramp():
     dot = (-axes['z'])/modv
     maxrad = maxdeg*math.pi/180
     return math.acos(dot) > maxrad
+
+ARDU = herkulex.servo(0x50)
+
+def hasvictim():
+    return ARDU.get_mlx()
