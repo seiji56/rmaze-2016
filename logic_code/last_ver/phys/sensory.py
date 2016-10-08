@@ -3,7 +3,7 @@ import os
 import math
 import Adafruit_ADS1x15
 import adxl345
-import herkulex
+import RPi.GPIO as gpio
 
 milli_time = lambda: int(round(time.time() * 1000))
 
@@ -105,10 +105,10 @@ def wl(sth):
 def wb(sth):
     return (distbr() + distbl())/2 > sth
 
-def wr(stha):
+def wr(sth):
     return (distrf() + distrb())/2 > sth
 
-def color(scth):
+def color(sth):
     return False
 
 base_all = 800
@@ -188,7 +188,23 @@ def isramp():
     maxrad = maxdeg*math.pi/180
     return math.acos(dot) > maxrad
 
-ARDU = herkulex.servo(0x50)
+gpio.setmode(gpio.BCM)
+
+gpio.setup(27, gpio.IN)
+gpio.setup(22, gpio.IN)
+gpio.setup(9, gpio.IN)
+gpio.setup(10, gpio.OUT)
+gpio.setup(11, gpio.OUT)
+
+gpio.output(10, gpio.LOW)
 
 def hasvictim():
-    return ARDU.get_mlx()
+    gpio.output(11, gpio.HIGH)
+    ret = -1
+    if gpio.input(27):
+        ret = 1
+    elif gpio.input(22):
+        ret = 0
+    elif gpio.input(9):
+        ret = 9
+    return ret

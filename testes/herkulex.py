@@ -431,7 +431,7 @@ class servo:
         except HerkulexError:
             raise HerkulexError("could not communicate with motors")
 
-    def  set_led(self, colorcode):
+    def set_led(self, colorcode):
         """ Set the LED Color of Herkulex
 
         Args:
@@ -619,6 +619,60 @@ class servo:
         except HerkulexError:
             raise HerkulexError("Could not communicate with motors")
 
+    def get_mlx(self):
+        """ Get mlx victims
+
+        This function gets current visible victims
+
+        """
+        data = []
+        data.append(0x09)
+        data.append(self.servoid)
+        data.append(RAM_READ_REQ)
+        data.append(0x5F)
+        data.append(BYTE1)
+        send_data(data)
+        rxdata = []
+        try:
+            print data
+            rxdata = SERPORT.read(12)
+            if rxdata[9] > 127:
+                rxdata[9] = -1
+            else:
+                rxdata[9] = ord(rxdata[9]) & 0xFF
+            return rxdata[9]
+        except:
+            raise HerkulexError("could not communicate with Arduino")
+
+
+    def get_mlx_value(self, address):
+        """ Gets the MLX value of arduino
+
+        Args:
+            none
+
+        Returns:
+            int: range from 0 to 65535
+
+        Raises:
+            SerialException: Error occured while opening serial port
+
+        """
+        data = []
+        data.append(0x09)
+        data.append(self.servoid)
+        data.append(RAM_READ_REQ)
+        data.append(address)
+        data.append(BYTE2)
+        send_data(data)
+        rxdata = []
+        try:
+            rxdata = SERPORT.read(13)
+            return ((ord(rxdata[10])&0xFF)<<8) | (ord(rxdata[9])&0xFF)
+        except HerkulexError:
+            raise HerkulexError("could not communicate with Arduino")
+
+ 
     def get_servo_torque(self):
         """ Gets the current torque of Herkulex
 

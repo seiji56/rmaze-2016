@@ -1,6 +1,7 @@
 import herkulex
 import time
 import thread
+import RPi.GPIO as gpio
 import sensory as sn
 
 herkulex.connect("/dev/ttyAMA0", 115200)
@@ -180,6 +181,11 @@ def upramp():
 def downramp():
     upramp()
 
+gpio.setmode(gpio.BCM)
+gpio.setup(20, gpio.OUT)
+
+gpio.output(20, gpio.LOW)
+
 def drop(side):
     ret = None
     if side == 0:
@@ -188,6 +194,12 @@ def drop(side):
         ret = (1, 1)
     elif side == 3:
         ret = (3, 1)
+    
+    for i in range(5):
+        gpio.output(20, gpio.HIGH)
+        time.sleep(.5)
+        gpio.output(20, gpio.LOW)
+        time.sleep(.5)
     apply(ret)
     DROP.set_servo_angle(0, 1, 0x08)
     time.sleep(1)
